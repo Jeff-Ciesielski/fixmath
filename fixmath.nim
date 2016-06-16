@@ -49,7 +49,7 @@ proc degToRad*(degrees: fix16): fix16 {.importc: "fix16_deg_to_rad", header: "fi
 
 # Additional functions
 proc sqrt*(inValue: fix16): fix16 {.importc: "fix16_sqrt", header: "fixmath.h", cdecl.}
-proc sq*(x: fix16): fix16 {.importc: "fix16_sq", header: "fixmath.h", cdecl.}
+proc square*(x: fix16): fix16 {.importc: "fix16_sq", header: "fixmath.h", cdecl.}
 proc exp*(inValue: fix16): fix16 {.importc: "fix16_exp", header: "fixmath.h", cdecl.}
 proc log*(inValue: fix16): fix16 {.importc: "fix16_log", header: "fixmath.h", cdecl.}
 proc log2*(x: fix16): fix16 {.importc: "fix16_log2", header: "fixmath.h", cdecl.}
@@ -57,10 +57,11 @@ proc slog2*(x: fix16): fix16 {.importc: "fix16_slog2", header: "fixmath.h", cdec
 
 # Utility functions
 proc toString*(value: fix16, buf: cstring, decimals: int): void {.importc: "fix16_to_str", header: "fixmath.h", cdecl.}
-proc toFix16*(a: int): fix16 {.importc: "fix16_from_int", header: "fixmath.h", cdecl.}
-proc toFix16*(a: float): fix16 {.importc: "fix16_from_float", header: "fixmath.h", cdecl.}
-proc toInt*(a: fix16): int {.importc: "fix16_to_int", header: "fixmath.h", cdecl.}
-proc toFloat*(a: fix16): float {.importc: "fix16_to_float", header: "fixmath.h", cdecl.}
+converter toFix16*(a: int): fix16 {.importc: "fix16_from_int", header: "fixmath.h", cdecl.}
+converter toFix16*(a: float): fix16 {.importc: "fix16_from_float", header: "fixmath.h", cdecl.}
+converter toInt*(a: fix16): int {.importc: "fix16_to_int", header: "fixmath.h", cdecl.}
+converter toFloat*(a: fix16): float {.importc: "fix16_to_float", header: "fixmath.h", cdecl.}
+
 
 proc `+`*(a, b: fix16): fix16 =
   result = f16Add(a, b)
@@ -74,6 +75,9 @@ proc `*`*(a, b: fix16): fix16 =
 proc `/`*(a, b: fix16): fix16 =
   result = f16Div(a, b)
 
+proc `%`*(a, b: fix16): fix16 =
+  result = f16Mod(a, b)
+
 proc `|+|`*(a, b: fix16): fix16 =
   result = satAdd(a, b)
 
@@ -86,14 +90,32 @@ proc `|*|`*(a, b: fix16): fix16 =
 proc `|/|`*(a, b: fix16): fix16 =
   result = satDiv(a, b)
 
+proc `!=`*(a, b: fix16): bool =
+  cast[int32](a) != cast[int32](b)
+
+proc `==`*(a, b: fix16): bool =
+  cast[int32](a) == cast[int32](b)
+
+proc `>`*(a, b: fix16): bool =
+  cast[int32](a) > cast[int32](b)
+
+proc `<`*(a, b: fix16): bool =
+  cast[int32](a) < cast[int32](b)
+
+proc `>=`*(a, b: fix16): bool =
+  cast[int32](a) >= cast[int32](b)
+
+proc `<=`*(a, b: fix16): bool =
+  cast[int32](a) <= cast[int32](b)
+
 proc `$`*(a: fix16): string =
   # The longest string that toString returns is 13 bytes long
   result = newString(13)
   toString(a, result.cstring, 7)
 
 when isMainModule:
-  let a: fix16 = 1.toFix16
-  let b: fix16 = 2.2.toFix16
+  let a: fix16 = 1
+  let b: fix16 = 2.2
   let c = (0xffff).toFix16
 
   echo "A: ", a
@@ -103,3 +125,7 @@ when isMainModule:
   echo "multiplied: ", a * b
   echo "divided: ", a / b
   echo "Saturated Add: ", c |+| c
+  echo "A > B: ", a > b
+  echo "A < B: ", a < b
+  echo "A < 2: ", a < 2
+  echo "2 < A: ", 2 < a
